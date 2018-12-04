@@ -17,35 +17,32 @@ function generateToken() {
 }
 // --------------------------------------------------------------
 // -------------------------------------------- INTERFACE -------
-exports.reset = function() {
+exports.reset = async function() {
+  await retriever.reset()
   tokenMap = {}
   userTokenMap = {}
-  retriever.reset()
 }
-exports.init = function() {
-  retriever.init()
-  retriever.addRoleRight('admin','useRetrieverMethods')
+exports.init = async function() {
+  await retriever.init()
+  await retriever.addRoleRight('admin','useRetrieverMethods')
 }
 // ------------------------------------------------------ CONNECT
-exports.requireToken = function(userKey) {
+exports.requireToken = async function(userKey) {
 
-  if(!retriever.userExists(userKey))
+  if(! await retriever.userExists(userKey))
     return null
 
   let token = generateToken()
-
   if(!userTokenMap.hasOwnProperty(userKey))
     userTokenMap[userKey] = []
-
   userTokenMap[userKey].push(token)
-
   return token
 
 }
-exports.tokenConnected = function(token) {
+exports.tokenConnected = async function(token) {
   return tokenMap.hasOwnProperty(token)
 }
-exports.connect = function(userKey, token) {
+exports.connect = async function(userKey, token) {
 
   if(userTokenMap.hasOwnProperty(userKey)) {
     let index = userTokenMap[userKey].indexOf(token)
@@ -57,9 +54,9 @@ exports.connect = function(userKey, token) {
   }
   return false
 }
-exports.disconnect = function(token) {
+exports.disconnect = async function(token) {
 
-  if(exports.tokenConnected(token)) {
+  if(await exports.tokenConnected(token)) {
     delete tokenMap[token]
     return true
   }
@@ -68,16 +65,17 @@ exports.disconnect = function(token) {
 }
 // ------------------------------------------------------ USING RETRIEVAL METHODS
 
-exports.getRetrievalInterface = function(token) {
+exports.getRetrievalInterface = async function(token) {
 
-  if(!exports.tokenConnected(token))
+  if(! await exports.tokenConnected(token))
     throw 'Token "'+token+'" is not connected'
 
   let userKey = tokenMap[token]
 
-  if( retriever.userHasRole(userKey,'admin') && 
-      retriever.roleHasRight('admin','useRetrieverMethods')) {
-    return retriever
+  if(await retriever.userHasRole(userKey,'admin')) {
+    if(await retriever.roleHasRight('admin','useRetrieverMethods'))
+      return retriever
+    else
+      return null
   }
-  return null
 }
