@@ -9,16 +9,13 @@ const colors = require('colors')
 // ----------------------------------- TESTS DATA INTERNAL -------
 
 var testMap = {}
-function createTest(testFunction) {
 
-  return new Promise((ok,rej) => {
+async function beforeMethod() {
+  await retriever.connectMongo('mongodb://127.0.0.1:27017','userDb','users')
+}
 
-    if(testFunction()) {
-
-    }
-
-  })
-
+async function afterMethod() {
+  await retriever.disconnectMongo()
 }
 
 // -------------------------------------------------------------------------------
@@ -313,7 +310,32 @@ async function test(testName, testObj, preindent) {
 }
 // ------------------
 
-test('Main tests',testMap).then(function(fullScore) {
+async function initTests(testMap) {
+  try {
+    await beforeMethod()
+  }
+  catch(error) {
+    console.log(('Error in the "before method": '+error).red)
+    return null
+  }
+  let score = await test('Main tests',testMap)
+  try {
+    await afterMethod()
+  }
+  catch(error) {
+    console.log(('Error in the "after method": '+error).red)
+    return null
+  }
+  return score
+}
+
+
+initTests(testMap).then(function(fullScore) {
+
+  if(fullScore == null) {
+    console.log('\nError one test set'.red)
+    return
+  }
 
   let testPassedStr = fullScore[1]>0?
     (fullScore[0]==0?'FAILED'.red:'FAILED'.yellow):
