@@ -27,71 +27,76 @@ function createTest(testFunction) {
 testMap['Retriever tests'] = {}
 
 // -----------
-testMap['Retriever tests']['reset'] = function() {
+testMap['Retriever tests']['reset'] = async function() {
 
-  return new Promise((ok,rej) => {
-    retriever.reset().then(function() {
-      retriever.retrieveAllUsers().then(function(users) {
-        ok(Object.keys(users).length == 0)
-      })
-    })
-  })
+  await retriever.reset()
+  let users = await retriever.retrieveAllUsers()
+
+  return Object.keys(users).length == 0
   
 }
 // -----------
 testMap['Retriever tests']['init db'] = function() {
-  retriever.reset()
 
-  let passed = true
-  passed &= !retriever.userExists('0000')
-  retriever.init()
-  passed &= retriever.userExists('0000')
-
-  return passed
-
-  return true
+  return new Promise((ok,rej) => {
+    retriever.reset().then(function() {
+      let passed = true
+      retriever.userExists('0000').then(function(exists) {
+        passed &= !exists
+        retriever.init().then(function() {
+          retriever.userExists('0000').then(function(exists) {
+            passed &= exists
+            ok(passed)
+          })
+        })
+      })
+    })
+  })
 }
 // -----------
 testMap['Retriever tests']['create user'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
-  
-  let passed = true
-  passed &= !retriever.userExists('1234')
-  retriever.createUser('1234','guest')
-  passed &= retriever.userExists('1234')
+  await retriever.reset()
+  await retriever.createRole('guest','none')
 
+  let passed = true
+  retriever.userExists('1234')
+  passed &= ! await retriever.userExists('1234')
+  retriever.createUser('1234','guest')
+  
+  passed &= await retriever.userExists('1234')
   return passed
 }
 // -----------
-testMap['Retriever tests']['remove user'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
-  
-  let passed = true
+testMap['Retriever tests']['remove user'] = async function() {
+    await retriever.reset()
 
-  retriever.createUser('1234','guest')
-  passed &= retriever.userExists('1234')
-  retriever.removeUser('1234')
-  passed &= !retriever.userExists('1234')
+    await retriever.createRole('guest','none')
+    await retriever.createUser('1234','guest')
 
-  return passed
+    let passed = true
+
+    passed &= await retriever.userExists('1234')
+    await retriever.removeUser('1234')
+    passed &= ! await retriever.userExists('1234')
+
+    return passed
 }
 // -----------
-testMap['Retriever tests']['update user'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
+testMap['Retriever tests']['update user'] = async function() {
+
+  await retriever.reset()
+  await retriever.createRole('guest','none')
   
   let passed = true
 
-  retriever.createUser('1234','guest')
-  passed &= retriever.userExists('1234')
-  passed &= !retriever.userExists('4321')
+  await retriever.createUser('1234','guest')
+  passed &= await retriever.userExists('1234')
+  passed &= ! await retriever.userExists('4321')
 
-  retriever.updateUserKey('1234','4321')
+  await retriever.updateUserKey('1234','4321')
 
-  passed &= !retriever.userExists('1234')
-  passed &= retriever.userExists('4321')
+  passed &= ! await retriever.userExists('1234')
+  passed &= await retriever.userExists('4321')
 
   return passed
 }
@@ -282,115 +287,40 @@ testMap['NAuthy test']['NAuthy use retrieval module'] = function() {
 // -------------------------------------------------------------------------------
 // ---------------------------------------------------------------
 // -------------------------------------------------- MAIN -------
-
-
-// ---------------------------------------------------------------
-function unitTest(testName, testObj, preindent, ok ,rej) {
-
-  let testRet
-
+async function unitTest(testName, testObj, preindent) {
   try {
-    testRet = testObj()
-    if(testRet.then == undefined) {
-      testRet = new Promise((ok,rej) => {
-        ok(testRet)
-      })
-    }
-  }
-  catch(error) {
-    testRet = new Promise((ok,rej) => {
-      rej(error)
-    })
-  }
-
-  testRet.then(function(passed) {
-
+    let passed = await testObj()
     let passedStr = passed?'PASSED'.green:'FAILED'.red
     console.log(preindent,'--',testName,':',passedStr)
-    ok(passed?[1,0]:[0,1])
-
-  })
-  .catch(function(error) {
-
+    return passed?[1,0]:[0,1]
+  }
+  catch(error) {
     console.log(preindent,'--',testName,':','ERROR'.red)
     console.log('  ',('ERROR: '+error).red)
-    ok([0,1])
-
-  })
+    return [0,1]
+  }
 }
-// ---------------------------------------------------------------
-
-function promiseQueue(queue) {
-
-  return new Promise((ok,rej) => {
-
-    let firstProm = queue[0]
-    queue.splice(0,1)
-
-    firstProm().then(function(score) {
-
-      if(queue.length == 0) {
-        ok(score)
-      }
-      else {
-        promiseQueue(queue).then(function(itsScore) {
-
-          score[0] += itsScore[0]
-          score[1] += itsScore[1]
-
-          ok(score)
-
-        })
-      }
-
-    })
-
-  })
-
-}
-
-// ---------------------------------------------------------------
-
-function multiTest(testName, testObj, preindent, ok, rej) {
-
+async function multiTest(testName, testObj, preindent) {
   let newindent = preindent+'/'+testName
-
-  let suPromises = []
+  let score = [0,0]
   for(let subTestName in testObj) {
-
     let subTestObj = testObj[subTestName]
-    let subPromise = test(subTestName, subTestObj, newindent)
-    suPromises.push(subPromise)
-
+    let subScore = await test(subTestName, subTestObj, newindent)
+    score[0] += subScore[0]
+    score[1] += subScore[1]
   }
-
-  console.log()
-  promiseQueue(suPromises).then(function(score) {
-    ok(score)
-  })
-
+  return score
 }
-
-// ---------------------------------------------------------------
-function test(testName, testObj, preindent) {
-
+async function test(testName, testObj, preindent) {
   preindent = preindent==undefined?'':preindent
-
-  return function() {
-    return new Promise((ok,rej) => {
-      if(typeof(testObj) == typeof({}))
-        multiTest(testName, testObj, preindent, ok, rej)
-      else
-        unitTest(testName, testObj, preindent, ok, rej)
-    })
-
-  }
-
+  if(typeof(testObj) == typeof({}))
+    return await multiTest(testName, testObj, preindent)
+  else
+    return await unitTest(testName, testObj, preindent)
 }
 // ------------------
 
-let prom = test('Main tests',testMap)
-prom().then(function(fullScore) {
+test('Main tests',testMap).then(function(fullScore) {
 
   let testPassedStr = fullScore[1]>0?
     (fullScore[0]==0?'FAILED'.red:'FAILED'.yellow):
