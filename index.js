@@ -12,6 +12,10 @@ function createToken(userKey) {
 
 // --------------------------------------------------------------
 // -------------------------------------------- INTERFACE -------
+exports.init = function() {
+  tokenMap = {}
+  retriever.initDataBase()
+}
 // ------------------------------------------------------ CONNECT
 exports.requireToken = function(userKey) {
 

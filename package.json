@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/hugodecasta/NAuthy/issues"
   },
-  "homepage": "https://github.com/hugodecasta/NAuthy#readme"
+  "homepage": "https://github.com/hugodecasta/NAuthy#readme",
+  "devDependencies": {
+    "colors": "^1.3.2"
+  }
 }
