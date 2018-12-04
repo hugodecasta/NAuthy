@@ -73,6 +73,15 @@ exports.removeUser = function(userKey) {
   delete userMap[userKey]
   return true
 }
+exports.updateUserKey = function(oldUserKey, newUserKey) {
+  if(!exports.userExists(userKey)) {
+    return false
+  }
+  let userObj = userMap[userKey]
+  delete userMap[userKey]
+  userMap[newUserKey] = userObj
+  return true
+}
 exports.userHasRole = function(userKey, role) {
   if(!exports.userExists(userKey)) {
     throw 'User "'+userKey+'" does not exist'
