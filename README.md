@@ -6,7 +6,9 @@ NodeJs User Authentification module using mongoDB
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![Bugs](https://img.shields.io/badge/bug_report-0-brightgreen.svg)
 
-## dependence information
+  * [v0.1.0](https://github.com/hugodecasta/NAuthy/releases/tag/v0.1.0) - "NAuthy - alpha 0.1.0 - base module no db saved"
+
+## dependency information
 
   * project dependency:
     none
