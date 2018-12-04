@@ -1,0 +1,25 @@
+{
+  "name": "nauthy",
+  "version": "0.1.0",
+  "description": "NodeJs User Authentification module using mongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hugodecasta/NAuthy.git"
+  },
+  "keywords": [
+    "Node",
+    "User",
+    "Authentification",
+    "Manager"
+  ],
+  "author": "Hugo Castaneda",
+  "license": "UNLICENCED",
+  "bugs": {
+    "url": "https://github.com/hugodecasta/NAuthy/issues"
+  },
+  "homepage": "https://github.com/hugodecasta/NAuthy#readme"
+}
