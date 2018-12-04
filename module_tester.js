@@ -36,34 +36,27 @@ testMap['Retriever tests']['reset'] = async function() {
   
 }
 // -----------
-testMap['Retriever tests']['init db'] = function() {
+testMap['Retriever tests']['init db'] = async function() {
 
-  return new Promise((ok,rej) => {
-    retriever.reset().then(function() {
-      let passed = true
-      retriever.userExists('0000').then(function(exists) {
-        passed &= !exists
-        retriever.init().then(function() {
-          retriever.userExists('0000').then(function(exists) {
-            passed &= exists
-            ok(passed)
-          })
-        })
-      })
-    })
-  })
+  await retriever.reset()
+  let passed = true
+  
+  passed &= ! await retriever.userExists('0000')
+  await retriever.init()
+  passed &= await retriever.userExists('0000')
+
+  return passed
 }
 // -----------
-testMap['Retriever tests']['create user'] = function() {
+testMap['Retriever tests']['create user'] = async function() {
   await retriever.reset()
   await retriever.createRole('guest','none')
 
   let passed = true
-  retriever.userExists('1234')
   passed &= ! await retriever.userExists('1234')
-  retriever.createUser('1234','guest')
-  
+  await retriever.createUser('1234','guest')
   passed &= await retriever.userExists('1234')
+
   return passed
 }
 // -----------
@@ -101,106 +94,107 @@ testMap['Retriever tests']['update user'] = async function() {
   return passed
 }
 // -----------
-testMap['Retriever tests']['user has role'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
+testMap['Retriever tests']['user has role'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','none')
 
-  retriever.createUser('1234','guest')
-  return retriever.userHasRole('1234','guest')
+  await retriever.createUser('1234','guest')
+  return await retriever.userHasRole('1234','guest')
 }
 // -----------
-testMap['Retriever tests']['user add role'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
-  retriever.createRole('newRole','none')
+testMap['Retriever tests']['user add role'] = async function() {
+  await retriever.reset()
 
-  retriever.createUser('1234','guest')
+  await retriever.createRole('guest','none')
+  await retriever.createRole('newRole','none')
+
+  await retriever.createUser('1234','guest')
   
   let passed = true
 
-  passed &= !retriever.userHasRole('1234','newRole')
-  retriever.addUserRole('1234','newRole')
-  passed &= retriever.userHasRole('1234','newRole')
+  passed &= ! await retriever.userHasRole('1234','newRole')
+  await retriever.addUserRole('1234','newRole')
+  passed &= await retriever.userHasRole('1234','newRole')
 
   return passed
 }
 // -----------
-testMap['Retriever tests']['user remove role'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
+testMap['Retriever tests']['user remove role'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','none')
 
-  retriever.createUser('1234','guest')
+  await retriever.createUser('1234','guest')
   
   let passed = true
 
-  passed &= retriever.userHasRole('1234','guest')
-  retriever.removeUserRole('1234','guest')
-  passed &= !retriever.userHasRole('1234','guest')
+  passed &= await retriever.userHasRole('1234','guest')
+  await retriever.removeUserRole('1234','guest')
+  passed &= ! await retriever.userHasRole('1234','guest')
 
   return passed
 }
 // -----------
-testMap['Retriever tests']['role exists'] = function() {
-  retriever.reset()
-  retriever.init()
+testMap['Retriever tests']['role exists'] = async function() {
+  await retriever.reset()
+  await retriever.init()
 
-  return retriever.roleExists('admin')
+  return await retriever.roleExists('admin')
 }
 // -----------
-testMap['Retriever tests']['add create role'] = function() {
-  retriever.reset()
+testMap['Retriever tests']['add create role'] = async function() {
+  await retriever.reset()
   
   let passed = true
 
-  passed &= !retriever.roleExists('guest')
-  retriever.createRole('guest','guestRight_#1')
-  passed &= retriever.roleExists('guest')
+  passed &= ! await retriever.roleExists('guest')
+  await retriever.createRole('guest','guestRight_#1')
+  passed &= await retriever.roleExists('guest')
 
   return passed
 }
 // -----------
-testMap['Retriever tests']['remove create role'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
+testMap['Retriever tests']['remove create role'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','none')
   
   let passed = true
 
-  passed &= retriever.roleExists('guest')
-  retriever.removeRole('guest')
-  passed &= !retriever.roleExists('guest')
+  passed &= await retriever.roleExists('guest')
+  await retriever.removeRole('guest')
+  passed &= ! await retriever.roleExists('guest')
 
   return passed
 }
 // -----------
-testMap['Retriever tests']['role has right'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','guestRight_#1')
+testMap['Retriever tests']['role has right'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','guestRight_#1')
 
-  return retriever.roleHasRight('guest','guestRight_#1')
+  return await retriever.roleHasRight('guest','guestRight_#1')
 }
 // -----------
-testMap['Retriever tests']['add role right'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','none')
+testMap['Retriever tests']['add role right'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','none')
   
   let passed = true
 
-  passed &= !retriever.roleHasRight('guest','guestRight_#1')
-  retriever.addRoleRight('guest','guestRight_#1')
-  passed &= retriever.roleHasRight('guest','guestRight_#1')
+  passed &= ! await retriever.roleHasRight('guest','guestRight_#1')
+  await retriever.addRoleRight('guest','guestRight_#1')
+  passed &= await retriever.roleHasRight('guest','guestRight_#1')
 
   return passed
 }
 // -----------
-testMap['Retriever tests']['remove role right'] = function() {
-  retriever.reset()
-  retriever.createRole('guest','guestRight_#1')
+testMap['Retriever tests']['remove role right'] = async function() {
+  await retriever.reset()
+  await retriever.createRole('guest','guestRight_#1')
   
   let passed = true
 
-  passed &= retriever.roleHasRight('guest','guestRight_#1')
-  retriever.removeRoleRight('guest','guestRight_#1')
-  passed &= !retriever.roleHasRight('guest','guestRight_#1')
+  passed &= await retriever.roleHasRight('guest','guestRight_#1')
+  await retriever.removeRoleRight('guest','guestRight_#1')
+  passed &= ! await retriever.roleHasRight('guest','guestRight_#1')
 
   return passed
 }
@@ -211,73 +205,72 @@ testMap['Retriever tests']['remove role right'] = function() {
 
 testMap['NAuthy test'] = {}
 // -----------
-testMap['NAuthy test']['NAuthy init'] = function() {
-  NAuthy.reset()
+testMap['NAuthy test']['NAuthy init'] = async function() {
+  await NAuthy.reset()
 
   let passed = true
 
-  passed &= NAuthy.requireToken('0000') == null
-  NAuthy.init()
-  passed &= NAuthy.requireToken('0000') != null
+  passed &= await NAuthy.requireToken('0000') == null
+  await NAuthy.init()
+  passed &= await NAuthy.requireToken('0000') != null
 
   return passed
 }
 // -----------
-testMap['NAuthy test']['NAuthy connect'] = function() {
-  NAuthy.reset()
-  NAuthy.init()
+testMap['NAuthy test']['NAuthy connect'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
 
   let passed = true
 
-  let token = NAuthy.requireToken('0000')
+  let token = await NAuthy.requireToken('0000')
 
-  passed &= !NAuthy.tokenConnected(token)
-  passed &= NAuthy.connect('0000',token)
-  passed &= NAuthy.tokenConnected(token)
+  passed &= ! await NAuthy.tokenConnected(token)
+  passed &= await NAuthy.connect('0000',token)
+  passed &= await NAuthy.tokenConnected(token)
 
   return passed
 }
 // -----------
-testMap['NAuthy test']['NAuthy disconnect'] = function() {
-  NAuthy.reset()
-  NAuthy.init()
+testMap['NAuthy test']['NAuthy disconnect'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
 
   let passed = true
 
-  let token = NAuthy.requireToken('0000')
+  let token = await NAuthy.requireToken('0000')
 
-  passed &= !NAuthy.disconnect(token)
-
-  NAuthy.connect('0000',token)
-  passed &= NAuthy.disconnect(token)
+  passed &= ! await NAuthy.disconnect(token)
+  await NAuthy.connect('0000',token)
+  passed &= await NAuthy.disconnect(token)
 
   return passed
 }
 // -----------
-testMap['NAuthy test']['NAuthy get retrieval module'] = function() {
-  NAuthy.reset()
-  NAuthy.init()
+testMap['NAuthy test']['NAuthy get retrieval module'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
 
-  let token = NAuthy.requireToken('0000')
-  NAuthy.connect('0000',token)
+  let token = await NAuthy.requireToken('0000')
+  await NAuthy.connect('0000',token)
 
-  return NAuthy.getRetrievalInterface(token) != null
+  return await NAuthy.getRetrievalInterface(token) != null
 }
 // -----------
-testMap['NAuthy test']['NAuthy use retrieval module'] = function() {
-  NAuthy.reset()
-  NAuthy.init()
+testMap['NAuthy test']['NAuthy use retrieval module'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
 
-  let token = NAuthy.requireToken('0000')
-  NAuthy.connect('0000',token)
+  let token = await NAuthy.requireToken('0000')
+  await NAuthy.connect('0000',token)
 
-  let retr = NAuthy.getRetrievalInterface(token)
+  let retr = await NAuthy.getRetrievalInterface(token)
 
   let passed = true
 
-  passed &= !retr.userExists('1234')
-  retr.createUser('1234','admin')
-  passed &= retr.userExists('1234')
+  passed &= ! await retr.userExists('1234')
+  await retr.createUser('1234','admin')
+  passed &= await retr.userExists('1234')
 
   return passed
 }
