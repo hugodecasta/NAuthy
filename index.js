@@ -1,45 +1,83 @@
 'use strict'
 
 const retriever = require('./retrievalMethods.js')
+const crypto = require('crypto');
 
 // --------------------------------------------------------------
 // --------------------------------------------- INTERNAL -------
+var userTokenMap = {}
 var tokenMap = {}
 
-function createToken(userKey) {
-
+function generateToken() {
+  let ri1 = Math.random()
+  let ri2 = Math.random()
+  let hashingStr = ri1 + '_' + ri2 + 'salt'
+  let token = crypto.createHash('sha256').update(hashingStr).digest('base64')
+  return token
 }
-
 // --------------------------------------------------------------
 // -------------------------------------------- INTERFACE -------
-exports.init = function() {
+exports.reset = function() {
   tokenMap = {}
-  retriever.initDataBase()
+  userTokenMap = {}
+  retriever.reset()
+}
+exports.init = function() {
+  retriever.init()
+  retriever.addRoleRight('admin','useRetrieverMethods')
 }
 // ------------------------------------------------------ CONNECT
 exports.requireToken = function(userKey) {
 
+  if(!retriever.userExists(userKey))
+    return null
+
+  let token = generateToken()
+
+  if(!userTokenMap.hasOwnProperty(userKey))
+    userTokenMap[userKey] = []
+
+  userTokenMap[userKey].push(token)
+
+  return token
+
+}
+exports.tokenConnected = function(token) {
+  return tokenMap.hasOwnProperty(token)
 }
 exports.connect = function(userKey, token) {
 
+  if(userTokenMap.hasOwnProperty(userKey)) {
+    let index = userTokenMap[userKey].indexOf(token)
+    if(index > -1) {
+      userTokenMap[userKey].splice(index,1)
+      tokenMap[token] = userKey
+      return true
+    }
+  }
+  return false
 }
-exports.disconnect = function(userKey, token) {
+exports.disconnect = function(token) {
+
+  if(exports.tokenConnected(token)) {
+    delete tokenMap[token]
+    return true
+  }
+  return false
 
 }
-// ------------------------------------------------------ INFO RETRIEVAL
-exports.userHasRight = function(userKey, token, right) {
+// ------------------------------------------------------ USING RETRIEVAL METHODS
 
-}
-// ------------------------------------------------------ 
-exports.createUser = function(userKey, token, newUserKey, baseRole) {
+exports.getRetrievalInterface = function(token) {
 
-}
-exports.addUserRole = function(userKey, token, newUserKey, role) {
+  if(!exports.tokenConnected(token))
+    throw 'Token "'+token+'" is not connected'
 
-}
-exports.addRole = function(userKey, token, role) {
+  let userKey = tokenMap[token]
 
-}
-exports.addRoleRight = function(userKey, token, role, right) {
-
+  if( retriever.userHasRole(userKey,'admin') && 
+      retriever.roleHasRight('admin','useRetrieverMethods')) {
+    return retriever
+  }
+  return null
 }

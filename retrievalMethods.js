@@ -74,11 +74,11 @@ exports.removeUser = function(userKey) {
   return true
 }
 exports.updateUserKey = function(oldUserKey, newUserKey) {
-  if(!exports.userExists(userKey)) {
+  if(!exports.userExists(oldUserKey)) {
     return false
   }
-  let userObj = userMap[userKey]
-  delete userMap[userKey]
+  let userObj = userMap[oldUserKey]
+  delete userMap[oldUserKey]
   userMap[newUserKey] = userObj
   return true
 }
