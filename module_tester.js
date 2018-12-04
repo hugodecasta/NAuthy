@@ -9,6 +9,17 @@ const colors = require('colors')
 // ----------------------------------- TESTS DATA INTERNAL -------
 
 var testMap = {}
+function createTest(testFunction) {
+
+  return new Promise((ok,rej) => {
+
+    if(testFunction()) {
+
+    }
+
+  })
+
+}
 
 // -------------------------------------------------------------------------------
 // --------------------------------------- RETRIEVER TESTS-----------------------
@@ -17,8 +28,15 @@ testMap['Retriever tests'] = {}
 
 // -----------
 testMap['Retriever tests']['reset'] = function() {
-  retriever.reset()
-  return Object.keys(retriever.retrieveAllUsers()).length == 0
+
+  return new Promise((ok,rej) => {
+    retriever.reset().then(function() {
+      retriever.retrieveAllUsers().then(function(users) {
+        ok(Object.keys(users).length == 0)
+      })
+    })
+  })
+  
 }
 // -----------
 testMap['Retriever tests']['init db'] = function() {
@@ -30,6 +48,8 @@ testMap['Retriever tests']['init db'] = function() {
   passed &= retriever.userExists('0000')
 
   return passed
+
+  return true
 }
 // -----------
 testMap['Retriever tests']['create user'] = function() {
@@ -263,53 +283,119 @@ testMap['NAuthy test']['NAuthy use retrieval module'] = function() {
 // ---------------------------------------------------------------
 // -------------------------------------------------- MAIN -------
 
-function test(testName, testObj, preindent) {
 
-  preindent = preindent==undefined?'':preindent
-  let newIndent = preindent+'/'+testName
+// ---------------------------------------------------------------
+function unitTest(testName, testObj, preindent, ok ,rej) {
 
-  let score = [0,0]
+  let testRet
 
+  try {
+    testRet = testObj()
+    if(testRet.then == undefined) {
+      testRet = new Promise((ok,rej) => {
+        ok(testRet)
+      })
+    }
+  }
+  catch(error) {
+    testRet = new Promise((ok,rej) => {
+      rej(error)
+    })
+  }
+
+  testRet.then(function(passed) {
+
+    let passedStr = passed?'PASSED'.green:'FAILED'.red
+    console.log(preindent,'--',testName,':',passedStr)
+    ok(passed?[1,0]:[0,1])
+
+  })
+  .catch(function(error) {
+
+    console.log(preindent,'--',testName,':','ERROR'.red)
+    console.log('  ',('ERROR: '+error).red)
+    ok([0,1])
+
+  })
+}
+// ---------------------------------------------------------------
+
+function promiseQueue(queue) {
+
+  return new Promise((ok,rej) => {
+
+    let firstProm = queue[0]
+    queue.splice(0,1)
+
+    firstProm().then(function(score) {
+
+      if(queue.length == 0) {
+        ok(score)
+      }
+      else {
+        promiseQueue(queue).then(function(itsScore) {
+
+          score[0] += itsScore[0]
+          score[1] += itsScore[1]
+
+          ok(score)
+
+        })
+      }
+
+    })
+
+  })
+
+}
+
+// ---------------------------------------------------------------
+
+function multiTest(testName, testObj, preindent, ok, rej) {
+
+  let newindent = preindent+'/'+testName
+
+  let suPromises = []
   for(let subTestName in testObj) {
 
     let subTestObj = testObj[subTestName]
-    if(typeof(subTestObj) == typeof({})) {
-      console.log()
-      let itsScore = test(subTestName,subTestObj,newIndent)
-      score[0] += itsScore[0]
-      score[1] += itsScore[1]
-    } else {
-      let unitPassed = false
-      let unitError = true
-      let errorStr = ''
-      try {
-        unitPassed = subTestObj()
-        unitError = false
-      } catch(error) {
-        errorStr = error
-        unitPassed = false
-      }
-      if(unitPassed)
-        score[0]++
-      else
-        score[1]++
-      let unitTestPassedStr = unitPassed?'PASSED'.green:'FAILED'.red
-      if(unitError) {
-        unitTestPassedStr = 'ERROR'.red
-      }
-      console.log(newIndent+' -- '+subTestName,':',unitTestPassedStr)
-      if(unitError) {
-        console.log('  ',('ERROR: '+errorStr).red)
-      }
-    }
+    let subPromise = test(subTestName, subTestObj, newindent)
+    suPromises.push(subPromise)
+
   }
-  return score
+
+  console.log()
+  promiseQueue(suPromises).then(function(score) {
+    ok(score)
+  })
+
+}
+
+// ---------------------------------------------------------------
+function test(testName, testObj, preindent) {
+
+  preindent = preindent==undefined?'':preindent
+
+  return function() {
+    return new Promise((ok,rej) => {
+      if(typeof(testObj) == typeof({}))
+        multiTest(testName, testObj, preindent, ok, rej)
+      else
+        unitTest(testName, testObj, preindent, ok, rej)
+    })
+
+  }
+
 }
 // ------------------
-let fullScore = test('Main tests',testMap)
 
-let testPassedStr = fullScore[1]>0?
-  (fullScore[0]==0?'FAILED'.red:'FAILED'.yellow):
-  'PASSED'.green
-console.log('\nFull test:',testPassedStr)
-console.log('\nPASSED:',fullScore[0],'\nFAILED:',fullScore[1])
+let prom = test('Main tests',testMap)
+prom().then(function(fullScore) {
+
+  let testPassedStr = fullScore[1]>0?
+    (fullScore[0]==0?'FAILED'.red:'FAILED'.yellow):
+    'PASSED'.green
+  console.log('\nFull test:',testPassedStr)
+  console.log('\nPASSED:',fullScore[0],'\nFAILED:',fullScore[1])
+
+})
