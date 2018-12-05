@@ -19,6 +19,10 @@ NodeJs User Authentification module using mongoDB
     * colors v1.3.2
 
 ## execution information
+
+### tests
+
+  * Run a mongodb instance on `mongodb://127.0.0.1:27017`
   * Launch tests: `npm test`
 
 ## examples
