@@ -295,6 +295,173 @@ testMap['NAuthy test']['NAuthy use retrieval module'] = async function() {
   return passed
 }
 
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// ----------------------------------- NAUTH ADVANCED TEST -----------------------
+
+testMap['NAuthy advanced test'] = {}
+
+testMap['NAuthy advanced test']['init admin'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  let adminKey = '0000'
+  let adminToken = await NAuthy.requireToken(adminKey)
+  await NAuthy.connect(adminKey, adminToken)
+
+  passed &= await NAuthy.tokenConnected(adminToken)
+
+  let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
+
+  let newAdminKey = 'secretAdminKey'
+  await theRetriever.updateUserKey(adminKey,newAdminKey)
+  passed &= await NAuthy.disconnect(adminToken)
+
+  passed &= ! await NAuthy.tokenConnected(adminToken)
+
+  adminToken = await NAuthy.requireToken(newAdminKey)
+  passed &= await NAuthy.connect(newAdminKey, adminToken)
+
+  passed &= await NAuthy.disconnect(adminToken)
+
+  return passed
+}
+// -----------
+testMap['NAuthy advanced test']['add new users'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  let adminKey = '0000'
+  let adminToken = await NAuthy.requireToken(adminKey)
+  await NAuthy.connect(adminKey, adminToken)
+
+  let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
+
+  passed &= await theRetriever.createRole('guest','guest')
+
+  let userKey1 = 'myNewUserKey1'
+  let userKey2 = 'myNewUserKey2'
+  passed &= await theRetriever.createUser(userKey1,'guest')
+  passed &= await theRetriever.createUser(userKey2,'guest')
+
+  passed &= await NAuthy.requireToken('_-_-_-') == null
+
+  passed &= await NAuthy.requireToken(userKey1) != null
+  passed &= await NAuthy.requireToken(userKey2) != null
+
+  return passed
+}
+// -----------
+testMap['NAuthy advanced test']['add users and connect'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  let adminKey = '0000'
+  let adminToken = await NAuthy.requireToken(adminKey)
+  await NAuthy.connect(adminKey, adminToken)
+
+  let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
+
+  theRetriever.createRole('guest','guest')
+
+  let userKey1 = 'myNewUserKey1'
+  let userKey2 = 'myNewUserKey2'
+  await theRetriever.createUser(userKey1,'guest')
+  await theRetriever.createUser(userKey2,'guest')
+
+  let userToken1 = await NAuthy.requireToken(userKey1)
+  let userToken2 = await NAuthy.requireToken(userKey2)
+
+  passed &= userToken1 != null
+  passed &= userToken2 != null
+
+  passed &= await NAuthy.connect(userKey1, userToken1)
+  passed &= await NAuthy.connect(userKey2, userToken2)
+
+  passed &= NAuthy.tokenConnected(userToken1)
+  passed &= NAuthy.tokenConnected(userToken2)
+
+  passed &= await NAuthy.disconnect(userToken1)
+  passed &= await NAuthy.disconnect(userToken2)
+
+  return passed
+}
+// -----------
+testMap['NAuthy advanced test']['remove connected user'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  let adminKey = '0000'
+  let adminToken = await NAuthy.requireToken(adminKey)
+  await NAuthy.connect(adminKey, adminToken)
+
+  let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
+
+  theRetriever.createRole('guest','guest')
+
+  let userKey1 = 'myNewUserKey1'
+  let userKey2 = 'myNewUserKey2'
+  await theRetriever.createUser(userKey1,'guest')
+  await theRetriever.createUser(userKey2,'guest')
+
+  let userToken1 = await NAuthy.requireToken(userKey1)
+  let userToken2 = await NAuthy.requireToken(userKey2)
+
+  await NAuthy.connect(userKey1, userToken1)
+  await NAuthy.connect(userKey2, userToken2)
+
+  passed &= ! await theRetriever.removeUser('_-_-_-')
+  passed &= await theRetriever.removeUser(userKey1)
+
+  passed &= ! await NAuthy.tokenConnected('_-_-_-')
+  passed &= ! await NAuthy.tokenConnected(userToken1)
+  passed &= await NAuthy.tokenConnected(userToken2)
+
+  return passed
+}
+// -----------
+testMap['NAuthy advanced test']['update connected user'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  let adminKey = '0000'
+  let adminToken = await NAuthy.requireToken(adminKey)
+  await NAuthy.connect(adminKey, adminToken)
+
+  let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
+
+  theRetriever.createRole('guest','guest')
+
+  let userKey1 = 'myNewUserKey1'
+  let userKey2 = 'myNewUserKey2'
+  await theRetriever.createUser(userKey1,'guest')
+  await theRetriever.createUser(userKey2,'guest')
+
+  let userToken1 = await NAuthy.requireToken(userKey1)
+  let userToken2 = await NAuthy.requireToken(userKey2)
+
+  await NAuthy.connect(userKey1, userToken1)
+  await NAuthy.connect(userKey2, userToken2)
+
+  passed &= ! await theRetriever.updateUserKey('_-_-_-','_-_-_-')
+  let newUserKey1 = 'myNewUserKey1_updated'
+  passed &= await theRetriever.updateUserKey(userKey1,newUserKey1)
+
+  passed &= ! await NAuthy.tokenConnected(userToken1)
+  passed &= await NAuthy.tokenConnected(userToken2)
+
+  return passed
+}
 
 
 // -------------------------------------------------------------------------------
