@@ -368,7 +368,7 @@ testMap['NAuthy advanced test']['add users and connect'] = async function() {
 
   let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
 
-  theRetriever.createRole('guest','guest')
+  await theRetriever.createRole('guest','guest')
 
   let userKey1 = 'myNewUserKey1'
   let userKey2 = 'myNewUserKey2'
@@ -405,7 +405,7 @@ testMap['NAuthy advanced test']['remove connected user'] = async function() {
 
   let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
 
-  theRetriever.createRole('guest','guest')
+  await theRetriever.createRole('guest','guest')
 
   let userKey1 = 'myNewUserKey1'
   let userKey2 = 'myNewUserKey2'
@@ -440,7 +440,7 @@ testMap['NAuthy advanced test']['update connected user'] = async function() {
 
   let theRetriever = await NAuthy.getRetrievalInterface(adminToken)
 
-  theRetriever.createRole('guest','guest')
+  await theRetriever.createRole('guest','guest')
 
   let userKey1 = 'myNewUserKey1'
   let userKey2 = 'myNewUserKey2'
