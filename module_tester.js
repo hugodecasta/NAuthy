@@ -45,6 +45,29 @@ testMap['Retriever tests']['init db'] = async function() {
   return passed
 }
 // -----------
+testMap['Retriever tests']['setup mongoClient'] = async function() {
+
+  let passed = true
+
+  passed &= await retriever.disconnectMongo()
+  passed &= ! await retriever.mongoIsConnected()
+
+  let MongoClient = require('mongodb').MongoClient;
+  let url = 'mongodb://127.0.0.1:27017'
+  let myClient = await MongoClient.connect(url, {useNewUrlParser: true})
+
+  await retriever.setupMongoClient(myClient,'userDb','users')
+
+  passed &= await retriever.mongoIsConnected()
+
+  await retriever.reset()
+  passed &= ! await retriever.userExists('0000')
+  await retriever.init()
+  passed &= await retriever.userExists('0000')
+
+  return passed
+}
+// -----------
 testMap['Retriever tests']['create user'] = async function() {
   await retriever.reset()
   await retriever.createRole('guest','none')

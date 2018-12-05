@@ -1,8 +1,5 @@
 'use strict'
 
-const MongoClient = require('mongodb').MongoClient;
-
-var mongoUrl = null
 var mongoDbName = null
 var mongoRoleCollection = null
 var mongoUserCollection = null
@@ -10,19 +7,18 @@ var mongoUserCollection = null
 var mongoClient = null
 var mongoDb = null
 
-// ------- fake MONGO
-var userMap = {}
-var roleMap = {}
-// ------- fake MONGO
-
 // ---------------------------------------- MONGO MANAGEMENT
-exports.connectMongo = async function(url, dbName, collectioName) {
-  mongoRoleCollection = collectioName+'_roles'
-  mongoUserCollection = collectioName+'_users'
+exports.connectMongo = async function(url, dbName, collectionName) {
+  let MongoClient = require('mongodb').MongoClient;
+  let client = await MongoClient.connect(url, {useNewUrlParser: true})
+  await exports.setupMongoClient(client, dbName, collectionName)
+}
+exports.setupMongoClient = async function(client, dbName, collectionName) {
+  mongoClient = client
+  mongoRoleCollection = collectionName+'_roles'
+  mongoUserCollection = collectionName+'_users'
   mongoDbName = dbName
-  mongoUrl = url
 
-  mongoClient = await MongoClient.connect(mongoUrl, {useNewUrlParser: true})
   mongoDb = mongoClient.db(mongoDbName)
 
   let collections = await mongoDb.collection('system.namespaces').find().toArray()
