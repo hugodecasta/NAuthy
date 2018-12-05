@@ -40,11 +40,27 @@ exports.requireToken = async function(userKey) {
 
 }
 exports.tokenConnected = async function(token) {
-  return tokenMap.hasOwnProperty(token)
+  let tokenIsConnected = tokenMap.hasOwnProperty(token)
+  if(tokenIsConnected) {
+    let userKey = tokenMap[token]
+    let userExists = await retriever.userExists(userKey)
+    if(!userExists) {
+      delete userTokenMap[userKey]
+      delete tokenMap[token]
+      return false
+    }
+    return true
+  }
+  return false
 }
 exports.connect = async function(userKey, token) {
 
   if(userTokenMap.hasOwnProperty(userKey)) {
+    if(! await retriever.userExists(userKey)) {
+      console.log('cannot connect')
+      delete userTokenMap[userKey]
+      return false
+    }
     let index = userTokenMap[userKey].indexOf(token)
     if(index > -1) {
       userTokenMap[userKey].splice(index,1)
