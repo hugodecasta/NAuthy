@@ -17,6 +17,17 @@ function generateToken() {
   return token
 }
 // --------------------------------------------------------------
+// ------------------------------------------------ MONGO -------
+exports.mongoConnectUrl = async function(mongoUrl, dbName, collName) {
+  return await retriever.connectMongo(mongoUrl, dbName, collName)
+}
+exports.mongoConnectClient = async function(mongoClient, dbName, collName) {
+  return await retriever.setupMongoClient(mongoClient, dbName, collName)
+}
+exports.mongoDisconnect = async function() {
+  return await retriever.disconnectMongo()
+}
+// --------------------------------------------------------------
 // -------------------------------------------- INTERFACE -------
 exports.reset = async function() {
   await retriever.reset()

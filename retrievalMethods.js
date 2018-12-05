@@ -11,7 +11,7 @@ var mongoDb = null
 exports.connectMongo = async function(url, dbName, collectionName) {
   let MongoClient = require('mongodb').MongoClient;
   let client = await MongoClient.connect(url, {useNewUrlParser: true})
-  await exports.setupMongoClient(client, dbName, collectionName)
+  return await exports.setupMongoClient(client, dbName, collectionName)
 }
 exports.setupMongoClient = async function(client, dbName, collectionName) {
   mongoClient = client
@@ -26,6 +26,7 @@ exports.setupMongoClient = async function(client, dbName, collectionName) {
     await mongoDb.createCollection(mongoRoleCollection)
   if(collections.indexOf(mongoUserCollection) == -1)
     await mongoDb.createCollection(mongoUserCollection)
+  return true
 }
 exports.disconnectMongo = async function() {
   if(mongoClient != null) {
