@@ -237,6 +237,36 @@ testMap['NAuthy test']['NAuthy init'] = async function() {
   return passed
 }
 // -----------
+testMap['NAuthy test']['NAuthy client connect'] = async function() {
+  await NAuthy.reset()
+  await NAuthy.init()
+
+  let passed = true
+
+  passed &= await retriever.mongoIsConnected()
+
+  passed &= await NAuthy.mongoDisconnect()
+  passed &= ! await NAuthy.mongoDisconnect()
+
+  let mongoUrl = 'mongodb://127.0.0.1:27017'
+
+  passed &= await NAuthy.mongoConnectUrl(mongoUrl,'userDb','users')
+  passed &= await retriever.mongoIsConnected()
+  passed &= await NAuthy.mongoDisconnect()
+
+  let MongoClient = require('mongodb').MongoClient
+  let myClient = await MongoClient.connect(mongoUrl, {useNewUrlParser: true})
+  passed &= await NAuthy.mongoConnectClient(myClient,'userDb','users')
+  passed &= await retriever.mongoIsConnected()
+  passed &= await NAuthy.mongoDisconnect()
+
+  await myClient.close()
+
+  await NAuthy.mongoConnectUrl(mongoUrl,'userDb','users')
+
+  return passed
+}
+// -----------
 testMap['NAuthy test']['NAuthy connect'] = async function() {
   await NAuthy.reset()
   await NAuthy.init()
