@@ -58,7 +58,6 @@ exports.connect = async function(userKey, token) {
 
   if(userTokenMap.hasOwnProperty(userKey)) {
     if(! await retriever.userExists(userKey)) {
-      console.log('cannot connect')
       delete userTokenMap[userKey]
       return false
     }
