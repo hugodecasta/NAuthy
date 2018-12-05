@@ -84,6 +84,7 @@ exports.createRole = async function(roleName, baseRights) {
   let roleCol = await exports.getRoleCollection()
   let roleDocument = {name:roleName,rights:[baseRights]}
   await roleCol.insertOne(roleDocument)
+  return true
 }
 exports.removeRole = async function(roleName) {
   if(! await exports.roleExists(roleName))
@@ -129,6 +130,7 @@ exports.createUser = async function(userKey, baseRole) {
   let userCol = await exports.getUserCollection()
   let userDocument = {key:userKey,roles:[baseRole]}
   await userCol.insertOne(userDocument)
+  return true
 }
 exports.removeUser = async function(userKey) {
   if(! await exports.userExists(userKey)) {
