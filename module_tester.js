@@ -519,8 +519,27 @@ async function initTests(testMap) {
   return score
 }
 
+function sortMap(testObj,testArgs) {
+  if(testArgs.length == 0)
+    return testObj
+  let newTestObject = {}
+  for(let subTestName in testObj) {
+    let subTestObj = testObj[subTestName]
+    if(testArgs.indexOf(subTestName)>-1) {
+      newTestObject[subTestName] = subTestObj
+    }
+    else if(typeof(subTestObj) == typeof({})) {
+      let newSubObject = sortMap(subTestObj,testArgs)
+      if(Object.keys(newSubObject).length > 0)
+        newTestObject[subTestName] = newSubObject
+    }
+  }
+  return newTestObject
+}
 
-initTests(testMap).then(function(fullScore) {
+let testArgs = process.argv
+testArgs.splice(0,2)
+initTests(sortMap(testMap,testArgs)).then(function(fullScore) {
 
   if(fullScore == null) {
     console.log('\nError one test set'.red)
