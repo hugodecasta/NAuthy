@@ -15,7 +15,8 @@ NodeJs User Authentification module using mongoDB
 ## dependency information
 
   * project dependency:
-    none
+    * crypto v1.0.1
+    * mongodb v3.1.10
 
   * development dependency:
     * colors v1.3.2
