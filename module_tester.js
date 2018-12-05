@@ -384,8 +384,8 @@ testMap['NAuthy advanced test']['add users and connect'] = async function() {
   passed &= await NAuthy.connect(userKey1, userToken1)
   passed &= await NAuthy.connect(userKey2, userToken2)
 
-  passed &= NAuthy.tokenConnected(userToken1)
-  passed &= NAuthy.tokenConnected(userToken2)
+  passed &= await NAuthy.tokenConnected(userToken1)
+  passed &= await NAuthy.tokenConnected(userToken2)
 
   passed &= await NAuthy.disconnect(userToken1)
   passed &= await NAuthy.disconnect(userToken2)
