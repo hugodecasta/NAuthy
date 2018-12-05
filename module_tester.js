@@ -413,17 +413,14 @@ testMap['NAuthy advanced test']['remove connected user'] = async function() {
   await theRetriever.createUser(userKey2,'guest')
 
   let userToken1 = await NAuthy.requireToken(userKey1)
-  let userToken2 = await NAuthy.requireToken(userKey2)
-
-  await NAuthy.connect(userKey1, userToken1)
-  await NAuthy.connect(userKey2, userToken2)
-
-  passed &= ! await theRetriever.removeUser('_-_-_-')
   passed &= await theRetriever.removeUser(userKey1)
-
-  passed &= ! await NAuthy.tokenConnected('_-_-_-')
+  passed &= ! await NAuthy.connect(userKey1, userToken1)
   passed &= ! await NAuthy.tokenConnected(userToken1)
-  passed &= await NAuthy.tokenConnected(userToken2)
+
+  let userToken2 = await NAuthy.requireToken(userKey2)
+  passed &= await NAuthy.connect(userKey2, userToken2)
+  passed &= await theRetriever.removeUser(userKey2)
+  passed &= ! await NAuthy.tokenConnected(userToken2)
 
   return passed
 }
