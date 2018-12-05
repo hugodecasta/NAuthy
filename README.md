@@ -3,10 +3,10 @@ NodeJs User Authentification module using mongoDB
 
 ## versioning infos
 ![Build](https://img.shields.io/badge/build-alpha-yellowgreen.svg)
-![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.3.2-blue.svg)
 ![Bugs](https://img.shields.io/badge/bug_report-0-brightgreen.svg)
 
-  * [v0.3.1](https://github.com/hugodecasta/NAuthy/releases/tag/v0.3.1) - "NAuthy - alpha 0.3.1 - updated with rejection for deleted/updated previously connected users"
+  * [v0.3.2](https://github.com/hugodecasta/NAuthy/releases/tag/v0.3.2) - "NAuthy - alpha 0.3.2 - fixed mongo dire connection (url/client) through NAuthy"
 
   * [v0.3.0](https://github.com/hugodecasta/NAuthy/releases/tag/v0.3.0) - "NAuthy - alpha 0.3.0 - updated with MongoDB connection"
 
