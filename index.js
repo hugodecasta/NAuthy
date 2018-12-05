@@ -7,6 +7,7 @@ const crypto = require('crypto');
 // --------------------------------------------- INTERNAL -------
 var userTokenMap = {}
 var tokenMap = {}
+var killedByUnexistance = {}
 
 function generateToken() {
   let ri1 = Math.random()
@@ -46,7 +47,7 @@ exports.tokenConnected = async function(token) {
     let userExists = await retriever.userExists(userKey)
     if(!userExists) {
       delete userTokenMap[userKey]
-      delete tokenMap[token]
+      tokenMap[token] = null
       return false
     }
     return true
@@ -72,7 +73,7 @@ exports.connect = async function(userKey, token) {
 }
 exports.disconnect = async function(token) {
 
-  if(await exports.tokenConnected(token)) {
+  if(tokenMap.hasOwnProperty(token)) {
     delete tokenMap[token]
     return true
   }
