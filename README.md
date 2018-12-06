@@ -33,3 +33,5 @@ NodeJs User Authentification module using mongoDB
 ## examples
 comming later ...
 
+## License (MIT)
+NAuthy is licenced under the [MIT Licence](LICENSE.md)
